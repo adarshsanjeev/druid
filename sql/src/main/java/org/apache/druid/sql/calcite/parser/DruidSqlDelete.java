@@ -33,41 +33,42 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 
-public class DruidSqlDelete extends DruidSqlIngest
+public class DruidSqlDelete extends DruidSqlReplace
 {
 
-  public static DruidSqlDelete create(SqlParserPos pos,
-                               SqlNodeList keywords,
-                               SqlNode targetTable,
-                               SqlNode source,
-                               SqlNodeList columnList,
-                               @Nullable Granularity partitionedBy,
-                               @Nullable String partitionedByStringForUnparse,
-                               @Nullable SqlNodeList clusteredBy)
+  public static DruidSqlDelete create(
+      SqlParserPos pos,
+      SqlNodeList keywords,
+      SqlNode targetTable,
+      SqlNode source,
+      SqlNodeList columnList,
+      @Nullable Granularity partitionedBy,
+      @Nullable String partitionedByStringForUnparse,
+      @Nullable SqlNodeList clusteredBy,
+      @Nullable SqlNode replaceTimeQuery
+  )
   {
     SqlBasicCall newSource = new SqlBasicCall(SqlStdOperatorTable.NOT, new SqlNode[] {source}, pos);
     SqlNodeList sqlNodes = new SqlNodeList(Collections.singleton(SqlIdentifier.star(pos)), pos);
     SqlSelect sqlSelect = new SqlSelect(pos, keywords, sqlNodes, targetTable, newSource, null, null, null, null, null, null);
     SqlInsert sqlInsert = new SqlInsert(pos, keywords, targetTable, sqlSelect, columnList);
-    return new DruidSqlDelete(sqlInsert, partitionedBy, partitionedByStringForUnparse, clusteredBy);
+    return new DruidSqlDelete(sqlInsert, partitionedBy, partitionedByStringForUnparse, clusteredBy, replaceTimeQuery);
   }
 
   public DruidSqlDelete(
       @Nonnull SqlInsert insertNode,
       @Nullable Granularity partitionedBy,
       @Nullable String partitionedByStringForUnparse,
-      @Nullable SqlNodeList clusteredBy
+      @Nullable SqlNodeList clusteredBy,
+      @Nullable SqlNode replaceTimeQuery
   )
   {
     super(
-        insertNode.getParserPosition(),
-        (SqlNodeList) insertNode.getOperandList().get(0), // No better getter to extract this
-        insertNode.getTargetTable(),
-        insertNode.getSource(),
-        insertNode.getTargetColumnList(),
+        insertNode,
         partitionedBy,
         partitionedByStringForUnparse,
-        clusteredBy
+        clusteredBy,
+        replaceTimeQuery
     );
   }
 }

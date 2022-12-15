@@ -157,10 +157,10 @@ public class DruidPlanner implements Closeable
     if (query.getKind() == SqlKind.INSERT) {
       if (query instanceof DruidSqlInsert) {
         return new IngestHandler.InsertHandler(handlerContext, (DruidSqlInsert) query, explain);
-      } else if (query instanceof DruidSqlReplace) {
-        return new IngestHandler.ReplaceHandler(handlerContext, (DruidSqlReplace) query, explain);
       } else if (query instanceof DruidSqlDelete) {
         return new IngestHandler.DeleteHandler(handlerContext, (DruidSqlDelete) query, explain);
+      } else if (query instanceof DruidSqlReplace) {
+        return new IngestHandler.ReplaceHandler(handlerContext, (DruidSqlReplace) query, explain);
       }
     }
 

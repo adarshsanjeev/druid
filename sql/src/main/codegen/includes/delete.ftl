@@ -62,7 +62,17 @@ SqlNode DruidSqlDeleteEof() :
     // actual error message.
     <EOF>
     {
-        return DruidSqlDelete.create(s.end(source), SqlNodeList.EMPTY, table, source, columnList, partitionedBy.lhs, partitionedBy.rhs, clusteredBy);
+        return DruidSqlDelete.create(
+          s.end(source),
+          SqlNodeList.EMPTY,
+          table,
+          source,
+          columnList,
+          partitionedBy.lhs,
+          partitionedBy.rhs,
+          clusteredBy,
+          SqlLiteral.createCharString("ALL", getPos())
+        );
     }
 }
 
