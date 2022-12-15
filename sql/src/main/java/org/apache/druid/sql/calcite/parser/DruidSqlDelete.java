@@ -19,27 +19,32 @@
 
 package org.apache.druid.sql.calcite.parser;
 
-import org.apache.calcite.sql.SqlNode;
+import org.apache.calcite.sql.SqlInsert;
 import org.apache.calcite.sql.SqlNodeList;
-import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.druid.java.util.common.granularity.Granularity;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class DruidSqlDelete extends DruidSqlIngest
 {
 
   public DruidSqlDelete(
-      SqlParserPos pos,
-      SqlNodeList keywords,
-      SqlNode targetTable,
-      SqlNode source,
-      SqlNodeList columnList,
+      @Nonnull SqlInsert insertNode,
       @Nullable Granularity partitionedBy,
       @Nullable String partitionedByStringForUnparse,
       @Nullable SqlNodeList clusteredBy
   )
   {
-    super(pos, keywords, targetTable, source, columnList, partitionedBy, partitionedByStringForUnparse, clusteredBy);
+    super(
+        insertNode.getParserPosition(),
+        (SqlNodeList) insertNode.getOperandList().get(0), // No better getter to extract this
+        insertNode.getTargetTable(),
+        insertNode.getSource(),
+        insertNode.getTargetColumnList(),
+        partitionedBy,
+        partitionedByStringForUnparse,
+        clusteredBy
+    );
   }
 }
