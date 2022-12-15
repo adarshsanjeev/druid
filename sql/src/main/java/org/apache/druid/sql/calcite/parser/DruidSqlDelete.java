@@ -47,7 +47,7 @@ public class DruidSqlDelete extends DruidSqlIngest
   {
     SqlBasicCall newSource = new SqlBasicCall(SqlStdOperatorTable.NOT, new SqlNode[] {source}, pos);
     SqlNodeList sqlNodes = new SqlNodeList(Collections.singleton(SqlIdentifier.star(pos)), pos);
-    SqlSelect sqlSelect = new SqlSelect(pos, keywords, sqlNodes, targetTable, newSource, SqlNodeList.EMPTY, null, null, null, null, null);
+    SqlSelect sqlSelect = new SqlSelect(pos, keywords, sqlNodes, targetTable, newSource, null, null, null, null, null, null);
     SqlInsert sqlInsert = new SqlInsert(pos, keywords, targetTable, sqlSelect, columnList);
     return new DruidSqlDelete(sqlInsert, partitionedBy, partitionedByStringForUnparse, clusteredBy);
   }

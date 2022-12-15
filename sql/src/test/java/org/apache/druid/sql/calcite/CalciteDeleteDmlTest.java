@@ -19,6 +19,8 @@
 
 package org.apache.druid.sql.calcite;
 
+import org.apache.druid.query.filter.NotDimFilter;
+import org.apache.druid.query.filter.SelectorDimFilter;
 import org.apache.druid.sql.calcite.filtration.Filtration;
 import org.junit.Test;
 
@@ -31,12 +33,13 @@ public class CalciteDeleteDmlTest extends CalciteIngestionDmlTest
   {
     testIngestionQuery()
         .sql("DELETE FROM foo WHERE dim1 = 'New' PARTITIONED BY ALL TIME")
-        .expectTarget("dst", FOO_TABLE_SIGNATURE)
-        .expectResources(dataSourceRead("foo"), dataSourceWrite("dst"))
+        .expectTarget("foo", FOO_TABLE_SIGNATURE)
+        .expectResources(dataSourceRead("foo"), dataSourceWrite("foo"))
         .expectQuery(
             newScanQueryBuilder()
                 .dataSource("foo")
                 .intervals(querySegmentSpec(Filtration.eternity()))
+                .filters(new NotDimFilter(new SelectorDimFilter("dim1", "New", null)))
                 .columns("__time", "cnt", "dim1", "dim2", "dim3", "m1", "m2", "unique_dim1")
                 .context(PARTITIONED_BY_ALL_TIME_QUERY_CONTEXT)
                 .build()
