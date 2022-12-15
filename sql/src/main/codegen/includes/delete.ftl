@@ -42,10 +42,7 @@ SqlNode DruidSqlDeleteEof() :
             }
         }
     ]
-    [
-        <OVERWRITE> <ALL>
-    ]
-    source = OrderedQueryOrExpr(ExprContext.ACCEPT_QUERY)
+    source = WhereOpt()
     [
       <PARTITIONED> <BY>
       partitionedBy = PartitionGranularity()
@@ -65,8 +62,7 @@ SqlNode DruidSqlDeleteEof() :
     // actual error message.
     <EOF>
     {
-        sqlInsert = new SqlInsert(s.end(source), SqlNodeList.EMPTY, table, source, columnList);
-        return new DruidSqlDelete(sqlInsert, partitionedBy.lhs, partitionedBy.rhs, clusteredBy);
+        return DruidSqlDelete.create(s.end(source), SqlNodeList.EMPTY, table, source, columnList, partitionedBy.lhs, partitionedBy.rhs, clusteredBy);
     }
 }
 

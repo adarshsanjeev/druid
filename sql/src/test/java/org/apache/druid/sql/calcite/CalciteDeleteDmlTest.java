@@ -30,7 +30,7 @@ public class CalciteDeleteDmlTest extends CalciteIngestionDmlTest
   public void testDelete()
   {
     testIngestionQuery()
-        .sql("DELETE FROM dst OVERWRITE ALL SELECT * FROM foo PARTITIONED BY ALL TIME")
+        .sql("DELETE FROM foo WHERE dim1 = 'New' PARTITIONED BY ALL TIME")
         .expectTarget("dst", FOO_TABLE_SIGNATURE)
         .expectResources(dataSourceRead("foo"), dataSourceWrite("dst"))
         .expectQuery(

@@ -19,15 +19,38 @@
 
 package org.apache.druid.sql.calcite.parser;
 
+import org.apache.calcite.sql.SqlBasicCall;
+import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlInsert;
+import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.fun.SqlStdOperatorTable;
+import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.druid.java.util.common.granularity.Granularity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 
 public class DruidSqlDelete extends DruidSqlIngest
 {
+
+  public static DruidSqlDelete create(SqlParserPos pos,
+                               SqlNodeList keywords,
+                               SqlNode targetTable,
+                               SqlNode source,
+                               SqlNodeList columnList,
+                               @Nullable Granularity partitionedBy,
+                               @Nullable String partitionedByStringForUnparse,
+                               @Nullable SqlNodeList clusteredBy)
+  {
+    SqlBasicCall newSource = new SqlBasicCall(SqlStdOperatorTable.NOT, new SqlNode[] {source}, pos);
+    SqlNodeList sqlNodes = new SqlNodeList(Collections.singleton(SqlIdentifier.star(pos)), pos);
+    SqlSelect sqlSelect = new SqlSelect(pos, keywords, sqlNodes, targetTable, newSource, SqlNodeList.EMPTY, null, null, null, null, null);
+    SqlInsert sqlInsert = new SqlInsert(pos, keywords, targetTable, sqlSelect, columnList);
+    return new DruidSqlDelete(sqlInsert, partitionedBy, partitionedByStringForUnparse, clusteredBy);
+  }
 
   public DruidSqlDelete(
       @Nonnull SqlInsert insertNode,
