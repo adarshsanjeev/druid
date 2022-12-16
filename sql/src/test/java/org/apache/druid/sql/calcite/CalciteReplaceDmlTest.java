@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.druid.java.util.common.StringUtils;
 import org.apache.druid.java.util.common.granularity.Granularities;
 import org.apache.druid.java.util.common.jackson.JacksonUtils;
+import org.apache.druid.math.expr.Function;
 import org.apache.druid.query.aggregation.CountAggregatorFactory;
 import org.apache.druid.query.aggregation.LongSumAggregatorFactory;
 import org.apache.druid.query.dimension.DefaultDimensionSpec;
@@ -198,6 +199,41 @@ public class CalciteReplaceDmlTest extends CalciteIngestionDmlTest
              + "SELECT * FROM foo PARTITIONED BY MONTH")
         .expectTarget("dst", FOO_TABLE_SIGNATURE)
         .expectResources(dataSourceRead("foo"), dataSourceWrite("dst"))
+        .expectQuery(
+            newScanQueryBuilder()
+                .dataSource("foo")
+                .intervals(querySegmentSpec(Filtration.eternity()))
+                .columns("__time", "cnt", "dim1", "dim2", "dim3", "m1", "m2", "unique_dim1")
+                .context(
+                    addReplaceTimeChunkToQueryContext(
+                        queryContextWithGranularity(Granularities.MONTH),
+                        "2000-01-01T00:00:00.000Z/2000-02-01T00:00:00.000Z"
+                    )
+                )
+                .build()
+        )
+        .verify();
+  }
+  //REPLACE INTO "kttm_simple" OVERWRITE ALL
+  //SELECT
+  //  CASE "country" WHEN 'New Zealand' THEN number + 1 ELSE number END AS "number",
+  //  *
+  //FROM "kttm_simple"
+  //PARTITIONED BY ALL
+
+  @Test
+  public void testReplace()
+  {
+    testIngestionQuery()
+        .sql(("REPLACE INTO foo OVERWRITE ALL "
+              + "SELECT "
+              + "CASE dim1 WHEN 'a' THEN cnt + 1 ELSE cnt END AS cnt, "
+              + "* "
+              + "FROM foo "
+              + "PARTITIONED BY ALL")
+        )
+        .expectTarget("foo", FOO_TABLE_SIGNATURE)
+        .expectResources(dataSourceRead("foo"), dataSourceWrite("foo"))
         .expectQuery(
             newScanQueryBuilder()
                 .dataSource("foo")

@@ -36,6 +36,7 @@ import org.apache.druid.server.security.ResourceAction;
 import org.apache.druid.sql.calcite.parser.DruidSqlDelete;
 import org.apache.druid.sql.calcite.parser.DruidSqlInsert;
 import org.apache.druid.sql.calcite.parser.DruidSqlReplace;
+import org.apache.druid.sql.calcite.parser.DruidSqlUpdate;
 import org.apache.druid.sql.calcite.run.SqlEngine;
 import org.joda.time.DateTimeZone;
 
@@ -159,6 +160,8 @@ public class DruidPlanner implements Closeable
         return new IngestHandler.InsertHandler(handlerContext, (DruidSqlInsert) query, explain);
       } else if (query instanceof DruidSqlDelete) {
         return new IngestHandler.DeleteHandler(handlerContext, (DruidSqlDelete) query, explain);
+      } else if (query instanceof DruidSqlUpdate) {
+        return new IngestHandler.UpdateHandler(handlerContext, (DruidSqlUpdate) query, explain);
       } else if (query instanceof DruidSqlReplace) {
         return new IngestHandler.ReplaceHandler(handlerContext, (DruidSqlReplace) query, explain);
       }

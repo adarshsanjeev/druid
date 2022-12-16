@@ -47,6 +47,7 @@ import org.apache.druid.sql.calcite.parser.DruidSqlIngest;
 import org.apache.druid.sql.calcite.parser.DruidSqlInsert;
 import org.apache.druid.sql.calcite.parser.DruidSqlParserUtils;
 import org.apache.druid.sql.calcite.parser.DruidSqlReplace;
+import org.apache.druid.sql.calcite.parser.DruidSqlUpdate;
 import org.apache.druid.sql.calcite.run.EngineFeature;
 import org.apache.druid.sql.calcite.run.QueryMaker;
 
@@ -356,6 +357,41 @@ public abstract class IngestHandler extends QueryHandler
     public DeleteHandler(
         SqlStatementHandler.HandlerContext handlerContext,
         DruidSqlDelete sqlNode,
+        SqlExplain explain
+    ) throws ValidationException
+    {
+      super(
+          handlerContext,
+          sqlNode,
+          convertQuery(sqlNode),
+          explain
+      );
+      this.sqlNode = sqlNode;
+    }
+
+    @Override
+    public SqlNode sqlNode()
+    {
+      return sqlNode;
+    }
+
+    @Override
+    protected DruidSqlIngest ingestNode()
+    {
+      return sqlNode;
+    }
+  }
+
+  /**
+   * Handler for the UPDATE statement.
+   */
+  protected static class UpdateHandler extends IngestHandler
+  {
+    private final DruidSqlUpdate sqlNode;
+
+    public UpdateHandler(
+        SqlStatementHandler.HandlerContext handlerContext,
+        DruidSqlUpdate sqlNode,
         SqlExplain explain
     ) throws ValidationException
     {
