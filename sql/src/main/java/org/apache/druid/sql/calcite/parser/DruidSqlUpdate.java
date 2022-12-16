@@ -19,16 +19,13 @@
 
 package org.apache.druid.sql.calcite.parser;
 
-import org.apache.calcite.sql.SqlAsOperator;
 import org.apache.calcite.sql.SqlBasicCall;
 import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlInsert;
 import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
 import org.apache.calcite.sql.SqlSelect;
-import org.apache.calcite.sql.SqlSetOperator;
 import org.apache.calcite.sql.fun.SqlCase;
-import org.apache.calcite.sql.fun.SqlCaseOperator;
 import org.apache.calcite.sql.fun.SqlStdOperatorTable;
 import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.druid.java.util.common.granularity.Granularity;
@@ -51,14 +48,13 @@ public class DruidSqlUpdate extends DruidSqlReplace
                                       @Nullable String partitionedByStringForUnparse,
                                       @Nullable SqlNodeList clusteredBy,
                                       SqlNodeList targetColumnList,
-                                      SqlNodeList sourceExpressionList
+                                      SqlNodeList sourceExpressionList,
+                                      @Nullable SqlNode replaceTimeQuery
   )
   {
-    //SqlBasicCall call = new SqlBasicCall(SqlCaseOperator.INSTANCE, )
-
     assert targetColumnList.size() == 1;
-    SqlCase sqlCase = new SqlCase(pos, null, SqlNodeList.of(source), sourceExpressionList, targetColumnList);
     SqlIdentifier identifier = (SqlIdentifier) targetColumnList.get(0);
+    SqlCase sqlCase = new SqlCase(pos, null, SqlNodeList.of(source), sourceExpressionList, identifier);
     SqlBasicCall asCall = new SqlBasicCall(SqlStdOperatorTable.AS, new SqlNode[]{sqlCase, identifier}, pos);
 
     SqlIdentifier star = SqlIdentifier.star(pos);
@@ -68,7 +64,7 @@ public class DruidSqlUpdate extends DruidSqlReplace
     SqlSelect sqlSelect = new SqlSelect(pos, keywords, sqlNodes, targetTable, null, null, null, null, null, null, null);
 
     SqlInsert sqlInsert = new SqlInsert(pos, keywords, targetTable, sqlSelect, columnList);
-    return new DruidSqlUpdate(sqlInsert, partitionedBy, partitionedByStringForUnparse, clusteredBy, null);
+    return new DruidSqlUpdate(sqlInsert, partitionedBy, partitionedByStringForUnparse, clusteredBy, replaceTimeQuery);
   }
 
   public DruidSqlUpdate(

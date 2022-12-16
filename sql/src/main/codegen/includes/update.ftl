@@ -83,7 +83,19 @@ SqlNode DruidSqlUpdateEof() :
     // actual error message.
     <EOF>
     {
-        return DruidSqlUpdate.create(s.end(source), SqlNodeList.EMPTY, table, source, columnList, partitionedBy.lhs, partitionedBy.rhs, clusteredBy, targetColumnList, sourceExpressionList);
+        return DruidSqlUpdate.create(
+          s.end(source),
+          SqlNodeList.EMPTY,
+          table,
+          source,
+          columnList,
+          partitionedBy.lhs,
+          partitionedBy.rhs,
+          clusteredBy,
+          targetColumnList,
+          sourceExpressionList,
+          SqlLiteral.createCharString("ALL", getPos())
+        );
     }
 }
 
