@@ -353,6 +353,7 @@ public abstract class IngestHandler extends QueryHandler
   protected static class DeleteHandler extends IngestHandler
   {
     private final DruidSqlDelete sqlNode;
+    private List<String> replaceIntervals;
 
     public DeleteHandler(
         SqlStatementHandler.HandlerContext handlerContext,
@@ -380,6 +381,34 @@ public abstract class IngestHandler extends QueryHandler
     {
       return sqlNode;
     }
+
+    @Override
+    public void validate() throws ValidationException
+    {
+      if (!handlerContext.plannerContext().engineHasFeature(EngineFeature.CAN_REPLACE)) {
+        throw new ValidationException(StringUtils.format(
+            "Cannot execute REPLACE with SQL engine '%s'.",
+            handlerContext.engine().name())
+        );
+      }
+      SqlNode replaceTimeQuery = sqlNode.getReplaceTimeQuery();
+      if (replaceTimeQuery == null) {
+        throw new ValidationException("Missing time chunk information in OVERWRITE clause for REPLACE. Use "
+                                      + "OVERWRITE WHERE <__time based condition> or OVERWRITE ALL to overwrite the entire table.");
+      }
+
+      replaceIntervals = DruidSqlParserUtils.validateQueryAndConvertToIntervals(
+          replaceTimeQuery,
+          ingestionGranularity,
+          handlerContext.timeZone());
+      super.validate();
+      if (replaceIntervals != null) {
+        handlerContext.queryContextMap().put(
+            DruidSqlReplace.SQL_REPLACE_TIME_CHUNKS,
+            String.join(",", replaceIntervals)
+        );
+      }
+    }
   }
 
   /**
@@ -388,6 +417,7 @@ public abstract class IngestHandler extends QueryHandler
   protected static class UpdateHandler extends IngestHandler
   {
     private final DruidSqlUpdate sqlNode;
+    private List<String> replaceIntervals;
 
     public UpdateHandler(
         SqlStatementHandler.HandlerContext handlerContext,
@@ -414,6 +444,34 @@ public abstract class IngestHandler extends QueryHandler
     protected DruidSqlIngest ingestNode()
     {
       return sqlNode;
+    }
+
+    @Override
+    public void validate() throws ValidationException
+    {
+      if (!handlerContext.plannerContext().engineHasFeature(EngineFeature.CAN_REPLACE)) {
+        throw new ValidationException(StringUtils.format(
+            "Cannot execute REPLACE with SQL engine '%s'.",
+            handlerContext.engine().name())
+        );
+      }
+      SqlNode replaceTimeQuery = sqlNode.getReplaceTimeQuery();
+      if (replaceTimeQuery == null) {
+        throw new ValidationException("Missing time chunk information in OVERWRITE clause for REPLACE. Use "
+                                      + "OVERWRITE WHERE <__time based condition> or OVERWRITE ALL to overwrite the entire table.");
+      }
+
+      replaceIntervals = DruidSqlParserUtils.validateQueryAndConvertToIntervals(
+          replaceTimeQuery,
+          ingestionGranularity,
+          handlerContext.timeZone());
+      super.validate();
+      if (replaceIntervals != null) {
+        handlerContext.queryContextMap().put(
+            DruidSqlReplace.SQL_REPLACE_TIME_CHUNKS,
+            String.join(",", replaceIntervals)
+        );
+      }
     }
   }
 }

@@ -64,6 +64,7 @@ public class DruidSqlUpdate extends DruidSqlReplace
     SqlSelect sqlSelect = new SqlSelect(pos, keywords, sqlNodes, targetTable, null, null, null, null, null, null, null);
 
     SqlInsert sqlInsert = new SqlInsert(pos, keywords, targetTable, sqlSelect, columnList);
+
     return new DruidSqlUpdate(sqlInsert, partitionedBy, partitionedByStringForUnparse, clusteredBy, replaceTimeQuery);
   }
 

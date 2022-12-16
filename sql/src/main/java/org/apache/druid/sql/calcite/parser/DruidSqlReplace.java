@@ -43,7 +43,7 @@ public class DruidSqlReplace extends DruidSqlIngest
 
   public static final SqlOperator OPERATOR = new SqlSpecialOperator("REPLACE", SqlKind.OTHER);
 
-  private final SqlNode replaceTimeQuery;
+  protected final SqlNode replaceTimeQuery;
 
   /**
    * While partitionedBy and partitionedByStringForUnparse can be null as arguments to the constructor, this is
