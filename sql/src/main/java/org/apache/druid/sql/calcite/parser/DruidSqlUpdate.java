@@ -19,21 +19,48 @@
 
 package org.apache.druid.sql.calcite.parser;
 
+import org.apache.calcite.sql.SqlIdentifier;
 import org.apache.calcite.sql.SqlInsert;
+import org.apache.calcite.sql.SqlNode;
 import org.apache.calcite.sql.SqlNodeList;
+import org.apache.calcite.sql.SqlSelect;
+import org.apache.calcite.sql.parser.SqlParserPos;
 import org.apache.druid.java.util.common.granularity.Granularity;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collections;
 
 public class DruidSqlUpdate extends DruidSqlIngest
 {
+
+  private SqlNodeList targetColumnList;
+  private SqlNodeList sourceExpressionList;
+
+  public static DruidSqlUpdate create(SqlParserPos pos,
+                                      SqlNodeList keywords,
+                                      SqlNode targetTable,
+                                      SqlNode source,
+                                      SqlNodeList columnList,
+                                      @Nullable Granularity partitionedBy,
+                                      @Nullable String partitionedByStringForUnparse,
+                                      @Nullable SqlNodeList clusteredBy,
+                                      SqlNodeList targetColumnList,
+                                      SqlNodeList sourceExpressionList)
+  {
+    SqlNodeList sqlNodes = new SqlNodeList(Collections.singleton(SqlIdentifier.star(pos)), pos);
+    SqlSelect sqlSelect = new SqlSelect(pos, keywords, sqlNodes, targetTable, source, null, null, null, null, null, null);
+    SqlInsert sqlInsert = new SqlInsert(pos, keywords, targetTable, sqlSelect, columnList);
+    return new DruidSqlUpdate(sqlInsert, partitionedBy, partitionedByStringForUnparse, clusteredBy, targetColumnList, sourceExpressionList);
+  }
 
   public DruidSqlUpdate(
       @Nonnull SqlInsert insertNode,
       @Nullable Granularity partitionedBy,
       @Nullable String partitionedByStringForUnparse,
-      @Nullable SqlNodeList clusteredBy
+      @Nullable SqlNodeList clusteredBy,
+      SqlNodeList targetColumnList,
+      SqlNodeList sourceExpressionList
   )
   {
     super(
@@ -46,5 +73,7 @@ public class DruidSqlUpdate extends DruidSqlIngest
         partitionedByStringForUnparse,
         clusteredBy
     );
+    this.targetColumnList = targetColumnList;
+    this.sourceExpressionList = sourceExpressionList;
   }
 }

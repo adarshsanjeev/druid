@@ -391,6 +391,7 @@ data: {
       "DruidSqlExplain()"
       "DruidSqlReplaceEof()"
       "DruidSqlDeleteEof()"
+      "DruidSqlUpdateEof()"
     ]
 
     # List of methods for parsing custom literals.
@@ -445,6 +446,7 @@ data: {
       "insert.ftl"
       "explain.ftl"
       "replace.ftl"
+      "update.ftl"
       "from.ftl"
     ]
 
